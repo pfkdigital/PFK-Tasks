@@ -19,31 +19,36 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AuthController {
 
-  private final AuthService authService;
+    private final AuthService authService;
 
-  @PostMapping("/register")
-  public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest)
-      throws IOException, ResendException {
-    authService.register(registerRequest);
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest)
+            throws IOException, ResendException {
+        authService.register(registerRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-  @PutMapping("/activate")
-  public ResponseEntity<?> activate(@RequestBody ConfirmAccountRequest confirmAccountRequest) {
-    authService.activateAccount(confirmAccountRequest);
-    return new ResponseEntity<>("Your account is active, please log in", HttpStatus.OK);
-  }
+    @PutMapping("/activate")
+    public ResponseEntity<?> activate(@RequestBody ConfirmAccountRequest confirmAccountRequest) {
+        authService.activateAccount(confirmAccountRequest);
+        return new ResponseEntity<>("Your account is active, please log in", HttpStatus.OK);
+    }
 
-  @PostMapping("/authenticate")
-  public ResponseEntity<?> authenticate(
-      @RequestBody AuthenticateRequest authenticateRequest, HttpServletResponse response) {
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> authenticate(
+            @RequestBody AuthenticateRequest authenticateRequest, HttpServletResponse response) {
 
-    return new ResponseEntity<>(
-        authService.authenticate(authenticateRequest, response), HttpStatus.OK);
-  }
+        return new ResponseEntity<>(
+                authService.authenticate(authenticateRequest, response), HttpStatus.OK);
+    }
 
-  @PostMapping("/refresh")
-  public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
-    return new ResponseEntity<>(authService.refresh(request, response), HttpStatus.OK);
-  }
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+        return new ResponseEntity<>(authService.refresh(request, response), HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        return new ResponseEntity<>(authService.logout(request), HttpStatus.OK);
+    }
 }

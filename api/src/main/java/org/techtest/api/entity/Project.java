@@ -2,6 +2,7 @@ package org.techtest.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,8 @@ import java.util.List;
 @Builder
 public class Project extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GenericGenerator(name = "custom-project-id", strategy = "org.techtest.api.util.CustomProjectIdGenerator")
     private String id;
     private String title;
     private String imageUrl;
@@ -25,7 +27,7 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Task> tasks;
 
     public void addTask(Task task) {

@@ -29,8 +29,8 @@ public class User implements UserDetails {
   private String username;
   private String password;
   private String email;
-  private String firstname;
-  private String lastname;
+  private String bio;
+  private String location;
   private String displayImageUrl;
   private String activationToken;
   private LocalDate activationTokenExpiryDate;
@@ -47,7 +47,7 @@ public class User implements UserDetails {
   private List<Project> projects;
 
   public String getName() {
-    return firstname + " " + lastname;
+    return username;
   }
 
   @Override

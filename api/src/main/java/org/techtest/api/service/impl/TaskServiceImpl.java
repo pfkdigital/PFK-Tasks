@@ -7,6 +7,7 @@ import org.techtest.api.dto.response.TaskResponse;
 import org.techtest.api.dto.response.TaskStepDTO;
 import org.techtest.api.entity.Task;
 import org.techtest.api.entity.TaskStep;
+import org.techtest.api.enums.TaskPriority;
 import org.techtest.api.enums.TaskStatus;
 import org.techtest.api.exception.TaskNotFoundException;
 import org.techtest.api.mapper.TaskMapper;
@@ -22,122 +23,124 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
-  private final TaskMapper taskMapper;
-  private final TaskStepMapper taskStepMapper;
-  private final TaskRepository taskRepository;
-  private final TaskStepRepository taskStepRepository;
+    private final TaskMapper taskMapper;
+    private final TaskStepMapper taskStepMapper;
+    private final TaskRepository taskRepository;
+    private final TaskStepRepository taskStepRepository;
 
-  @Override
-  public TaskResponse createTask(TaskRequest request) {
-    if (request.getTaskSteps() == null) {
-      throw new IllegalArgumentException("A task must have at least one task step");
+    @Override
+    public TaskResponse createTask(TaskRequest request) {
+        if (request.getTaskSteps() == null) {
+            throw new IllegalArgumentException("A task must have at least one task step");
+        }
+
+        Task task =
+                Task.builder()
+                        .title(request.getTitle())
+                        .description(request.getDescription())
+                        .status(TaskStatus.PENDING.name())
+                        .priority(TaskPriority.valueOf(request.getPriority()))
+                        .build();
+
+        request.getTaskSteps().stream().map(taskStepMapper::mapToEntity).forEach(task::addTaskStep);
+
+        Task savedTask = taskRepository.save(task);
+
+        return taskMapper.mapToDto(savedTask);
     }
 
-    Task task =
-        Task.builder()
-            .title(request.getTitle())
-            .description(request.getDescription())
-            .status(TaskStatus.PENDING.name())
-            .build();
+    @Override
+    public List<TaskResponse> getTasks() {
+        List<Task> tasks = taskRepository.findAll();
 
-    request.getTaskSteps().stream().map(taskStepMapper::mapToEntity).forEach(task::addTaskStep);
+        return tasks.stream().map(taskMapper::mapToDto).collect(Collectors.toList());
+    }
 
-    Task savedTask = taskRepository.save(task);
+    @Override
+    public TaskResponse getTask(String id) {
+        Task task =
+                taskRepository
+                        .findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-    return taskMapper.mapToDto(savedTask);
-  }
+        return taskMapper.mapToDto(task);
+    }
 
-  @Override
-  public List<TaskResponse> getTasks() {
-    List<Task> tasks = taskRepository.findAll();
+    @Override
+    public TaskResponse updateTask(String id, TaskRequest request) {
+        Task task =
+                taskRepository
+                        .findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-    return tasks.stream().map(taskMapper::mapToDto).collect(Collectors.toList());
-  }
+        Task updatedTask = taskMapper.mapToEntity(request);
 
-  @Override
-  public TaskResponse getTask(String id) {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+        task.setTitle(updatedTask.getTitle());
+        task.setDescription(updatedTask.getDescription());
+        task.setStatus(updatedTask.getStatus());
+        task.setPriority(updatedTask.getPriority());
+        task.setTaskSteps(updatedTask.getTaskSteps());
 
-    return taskMapper.mapToDto(task);
-  }
+        Task savedTask = taskRepository.save(task);
 
-  @Override
-  public TaskResponse updateTask(String id, TaskRequest request) {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+        return taskMapper.mapToDto(savedTask);
+    }
 
-    Task updatedTask = taskMapper.mapToEntity(request);
+    @Override
+    public String updateTaskStatus(String id, String status) {
+        Task task =
+                taskRepository
+                        .findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-    task.setTitle(updatedTask.getTitle());
-    task.setDescription(updatedTask.getDescription());
-    task.setStatus(updatedTask.getStatus());
-    task.setTaskSteps(updatedTask.getTaskSteps());
+        task.setStatus(status);
 
-    Task savedTask = taskRepository.save(task);
+        return "Task status of id: " + id + " has been updated to " + status;
+    }
 
-    return taskMapper.mapToDto(savedTask);
-  }
+    @Override
+    public TaskResponse addTaskStep(String id, TaskStepDTO taskStepDTO) {
+        Task task =
+                taskRepository
+                        .findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-  @Override
-  public String updateTaskStatus(String id, String status) {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+        task.addTaskStep(taskStepMapper.mapToEntity(taskStepDTO));
 
-    task.setStatus(status);
+        Task savedTask = taskRepository.save(task);
 
-    return "Task status of id: " + id + " has been updated to " + status;
-  }
+        return taskMapper.mapToDto(savedTask);
+    }
 
-  @Override
-  public TaskResponse addTaskStep(String id, TaskStepDTO taskStepDTO) {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+    @Override
+    public TaskResponse deleteTaskStep(String id, String stepId) {
+        Task task =
+                taskRepository
+                        .findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-    task.addTaskStep(taskStepMapper.mapToEntity(taskStepDTO));
+        TaskStep taskStep =
+                taskStepRepository
+                        .findById(stepId)
+                        .orElseThrow(() -> new TaskNotFoundException("Task step not found with id: " + stepId));
 
-    Task savedTask = taskRepository.save(task);
+        task.removeTaskStep(taskStep);
 
-    return taskMapper.mapToDto(savedTask);
-  }
+        Task savedTask = taskRepository.save(task);
 
-  @Override
-  public TaskResponse deleteTaskStep(String id, String stepId) {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
-
-    TaskStep taskStep =
-        taskStepRepository
-            .findById(stepId)
-            .orElseThrow(() -> new TaskNotFoundException("Task step not found with id: " + stepId));
-
-    task.removeTaskStep(taskStep);
-
-    Task savedTask = taskRepository.save(task);
-
-    return taskMapper.mapToDto(savedTask);
-  }
+        return taskMapper.mapToDto(savedTask);
+    }
 
 
-  @Override
-  public String deleteTask(String id) {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+    @Override
+    public String deleteTask(String id) {
+        Task task =
+                taskRepository
+                        .findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
-    taskRepository.delete(task);
+        taskRepository.delete(task);
 
-    return "Task of id: " + id + " has been deleted successfully";
-  }
+        return "Task of id: " + id + " has been deleted successfully";
+    }
 }

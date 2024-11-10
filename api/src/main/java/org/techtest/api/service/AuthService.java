@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.techtest.api.dto.request.AuthenticateRequest;
 import org.techtest.api.dto.request.ConfirmAccountRequest;
 import org.techtest.api.dto.request.RegisterRequest;
+import org.techtest.api.dto.response.MessageResponse;
 import org.techtest.api.dto.response.TokenResponse;
 import org.techtest.api.dto.response.UserResponse;
 
@@ -21,4 +22,6 @@ public interface AuthService {
   UserResponse authenticate(AuthenticateRequest authenticateRequest, HttpServletResponse response);
 
   HttpServletResponse refresh(HttpServletRequest request, HttpServletResponse response);
+
+  MessageResponse logout(HttpServletRequest request);
 }

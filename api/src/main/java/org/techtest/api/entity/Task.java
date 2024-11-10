@@ -2,6 +2,8 @@ package org.techtest.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.techtest.api.enums.TaskPriority;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +18,15 @@ import java.util.List;
 @Builder
 public class Task extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GenericGenerator(name = "custom-task-id", strategy = "org.techtest.api.util.CustomTaskIdGenerator")
     private String id;
     private String title;
     private String description;
     private String status;
+
+    @Enumerated(EnumType.STRING)
+    private TaskPriority priority;
 
     @ManyToOne
     @JoinColumn(name = "projectId", insertable = false, updatable = false)

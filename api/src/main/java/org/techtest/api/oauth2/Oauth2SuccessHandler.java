@@ -1,11 +1,10 @@
-package org.techtest.api.config.security.oauth2;
+package org.techtest.api.oauth2;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -32,12 +31,6 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
   private final CookieUtil cookieUtil;
   private final JwtService jwtService;
   private final UserRepository userRepository;
-
-  @Value("${security.jwt.expiration}")
-  private long accessTokenExpireTime;
-
-  @Value("${security.jwt.refresh.expiration}")
-  private long refreshTokenExpireTime;
 
   @Override
   public void onAuthenticationSuccess(
@@ -68,9 +61,6 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
       user.setProvider(oauthUser.getProvider());
       user.setRole(oauthUser.getRole());
       user.setEmail(oauthUser.getEmail());
-      user.setFirstname(oauthUser.getFirstname());
-      user.setLastname(oauthUser.getLastname());
-
       userRepository.save(user);
     }
 
@@ -92,7 +82,7 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
     String picture = (String) attributes.get("picture");
     String username = email.split("@")[0];
 
-    return buildUser(email, firstName, lastName, username, picture, AuthProvider.GOOGLE.name());
+    return buildUser(email, username, picture, AuthProvider.GOOGLE.name());
   }
 
   private User processOauth2Github(Map<String, Object> attributes) {
@@ -103,20 +93,16 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
     String username = (String) attributes.get("login");
     String picture = (String) attributes.get("avatar_url");
 
-    return buildUser(email, firstName, lastName, username, picture, AuthProvider.GITHUB.name());
+    return buildUser(email, username, picture, AuthProvider.GITHUB.name());
   }
 
   private User buildUser(
       String email,
-      String firstName,
-      String lastName,
       String username,
       String picture,
       String provider) {
     return User.builder()
         .username(username)
-        .firstname(firstName)
-        .lastname(lastName)
         .email(email)
         .displayImageUrl(picture)
         .provider(provider)

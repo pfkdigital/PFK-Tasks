@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.techtest.api.dto.request.AuthenticateRequest;
 import org.techtest.api.dto.request.ConfirmAccountRequest;
 import org.techtest.api.dto.request.RegisterRequest;
+import org.techtest.api.dto.response.MessageResponse;
 import org.techtest.api.dto.response.TokenResponse;
 import org.techtest.api.dto.response.UserResponse;
 import org.techtest.api.entity.User;
@@ -33,159 +34,166 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-  private final CookieUtil cookieUtil;
-  private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
-  private final JwtService jwtService;
-  private final EmailService emailService;
-  private final AuthenticationManager authenticationManager;
+    private final CookieUtil cookieUtil;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final EmailService emailService;
+    private final AuthenticationManager authenticationManager;
 
-  @Override
-  public void register(RegisterRequest registerRequest) throws IOException, ResendException {
-    String activationToken = generateRegistrationCode();
+    @Override
+    public void register(RegisterRequest registerRequest) throws IOException, ResendException {
+        String activationToken = generateRegistrationCode();
 
-    if (userRepository.existsByUsername(registerRequest.getUsername())) {
-      throw new RuntimeException("Username is already taken");
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new RuntimeException("Username is already taken");
+        }
+
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new RuntimeException("Email is already taken");
+        }
+
+        User newUser =
+                User.builder()
+                        .username(registerRequest.getUsername())
+                        .password(passwordEncoder.encode(registerRequest.getPassword()))
+                        .email(registerRequest.getEmail())
+                        .bio(registerRequest.getBio())
+                        .location(registerRequest.getLocation())
+                        .role(Role.ROLE_USER)
+                        .provider(AuthProvider.CREDENTIALS.name())
+                        .isEnabled(false)
+                        .activationToken(activationToken)
+                        .activationTokenExpiryDate(LocalDate.now().plusDays(1))
+                        .build();
+
+        User savedUser = userRepository.save(newUser);
+
+        emailService.sendEmail(savedUser.getEmail(), savedUser.getName(), activationToken);
     }
 
-    if (userRepository.existsByEmail(registerRequest.getEmail())) {
-      throw new RuntimeException("Email is already taken");
+    public void activateAccount(ConfirmAccountRequest confirmAccountRequest) {
+        Optional<User> user =
+                userRepository.findUserByActivationToken(confirmAccountRequest.getActivationCode());
+
+        if (user.isEmpty()) {
+            throw new RuntimeException("Activation token is invalid");
+        }
+
+        if (LocalDate.now().isAfter(user.get().getActivationTokenExpiryDate())) {
+            throw new RuntimeException("Activation token is expired");
+        }
+
+        user.get().setEnabled(true);
+        user.get().setActivationToken(null);
+        user.get().setActivationTokenExpiryDate(null);
+
+        userRepository.save(user.get());
     }
 
-    User newUser =
-        User.builder()
-            .username(registerRequest.getUsername())
-            .password(passwordEncoder.encode(registerRequest.getPassword()))
-            .email(registerRequest.getEmail())
-            .firstname(registerRequest.getFirstname())
-            .lastname(registerRequest.getLastname())
-            .role(Role.ROLE_USER)
-            .provider(AuthProvider.CREDENTIALS.name())
-            .isEnabled(false)
-            .activationToken(activationToken)
-            .activationTokenExpiryDate(LocalDate.now().plusDays(1))
-            .build();
+    @Override
+    public void resendActivationToken(String activationCode)
+            throws IOException, RuntimeException, ResendException {
+        Optional<User> user = userRepository.findUserByActivationToken(activationCode);
 
-    User savedUser = userRepository.save(newUser);
+        if (user.isEmpty()) {
+            throw new RuntimeException("Activation token is invalid");
+        }
+        String activationToken = generateRegistrationCode();
 
-    emailService.sendEmail(savedUser.getEmail(), savedUser.getName(), activationToken);
-  }
+        user.get().setActivationToken(activationToken);
+        user.get().setActivationTokenExpiryDate(LocalDate.now().plusDays(1));
 
-  public void activateAccount(ConfirmAccountRequest confirmAccountRequest) {
-    Optional<User> user =
-        userRepository.findUserByActivationToken(confirmAccountRequest.getActivationCode());
+        User updatedUser = userRepository.save(user.get());
 
-    if (user.isEmpty()) {
-      throw new RuntimeException("Activation token is invalid");
+        emailService.sendEmail(updatedUser.getEmail(), updatedUser.getName(), activationToken);
     }
 
-    if (LocalDate.now().isAfter(user.get().getActivationTokenExpiryDate())) {
-      throw new RuntimeException("Activation token is expired");
+    @Override
+    public UserResponse authenticate(
+            AuthenticateRequest authenticateRequest, HttpServletResponse response) {
+
+        Optional<User> userOptional = userRepository.findByUsername(authenticateRequest.getUsername());
+
+        if (userOptional.isEmpty()) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        var auth =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                authenticateRequest.getUsername(), authenticateRequest.getPassword()));
+
+        User user = (User) auth.getPrincipal();
+
+        var tokens = generateJwtTokens(user);
+
+        Cookie accessTokenCookie = cookieUtil.createAccessTokenCookie(tokens.getAccessToken());
+        Cookie refreshTokenCookie = cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken());
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        return UserResponse.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .displayImageUrl(user.getDisplayImageUrl())
+                .build();
     }
 
-    user.get().setEnabled(true);
-    user.get().setActivationToken(null);
-    user.get().setActivationTokenExpiryDate(null);
+    @Override
+    public HttpServletResponse refresh(HttpServletRequest request, HttpServletResponse response) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Refresh token is missing");
+        }
+        String jwtToken = authHeader.substring(7);
+        String username = jwtService.extractUsername(jwtToken);
 
-    userRepository.save(user.get());
-  }
+        if (username == null) {
+            throw new RuntimeException("Invalid token");
+        }
 
-  @Override
-  public void resendActivationToken(String activationCode)
-      throws IOException, RuntimeException, ResendException {
-    Optional<User> user = userRepository.findUserByActivationToken(activationCode);
+        User userDetails =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    if (user.isEmpty()) {
-      throw new RuntimeException("Activation token is invalid");
-    }
-    String activationToken = generateRegistrationCode();
+        if (jwtService.validateToken(jwtToken, userDetails)) {
+            TokenResponse tokens = generateJwtTokens(userDetails);
 
-    user.get().setActivationToken(activationToken);
-    user.get().setActivationTokenExpiryDate(LocalDate.now().plusDays(1));
-
-    User updatedUser = userRepository.save(user.get());
-
-    emailService.sendEmail(updatedUser.getEmail(), updatedUser.getName(), activationToken);
-  }
-
-  @Override
-  public UserResponse authenticate(
-      AuthenticateRequest authenticateRequest, HttpServletResponse response) {
-
-    Optional<User> userOptional = userRepository.findByUsername(authenticateRequest.getUsername());
-
-    if (userOptional.isEmpty()) {
-      throw new UsernameNotFoundException("User not found");
+            response.addCookie(cookieUtil.createAccessTokenCookie(tokens.getAccessToken()));
+            response.addCookie(cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()));
+            return response;
+        } else {
+            throw new RuntimeException("Invalid token");
+        }
     }
 
-    var auth =
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                authenticateRequest.getUsername(), authenticateRequest.getPassword()));
+    public MessageResponse logout(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        cookieUtil.clearCookies(cookies);
 
-    User user = (User) auth.getPrincipal();
-
-    var tokens = generateJwtTokens(user);
-
-    Cookie accessTokenCookie = cookieUtil.createAccessTokenCookie(tokens.getAccessToken());
-    Cookie refreshTokenCookie = cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken());
-
-    response.addCookie(accessTokenCookie);
-    response.addCookie(refreshTokenCookie);
-
-    return UserResponse.builder()
-        .username(user.getUsername())
-        .email(user.getEmail())
-        .displayImageUrl(user.getDisplayImageUrl())
-        .build();
-  }
-
-  @Override
-  public HttpServletResponse refresh(HttpServletRequest request, HttpServletResponse response) {
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      throw new RuntimeException("Refresh token is missing");
-    }
-    String jwtToken = authHeader.substring(7);
-    String username = jwtService.extractUsername(jwtToken);
-
-    if (username == null) {
-      throw new RuntimeException("Invalid token");
+        return new MessageResponse("Logout successful");
     }
 
-    User userDetails =
-        userRepository
-            .findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    private String generateRegistrationCode() {
+        Random random = new Random();
 
-    if (jwtService.validateToken(jwtToken, userDetails)) {
-      TokenResponse tokens = generateJwtTokens(userDetails);
-
-      response.addCookie(cookieUtil.createAccessTokenCookie(tokens.getAccessToken()));
-      response.addCookie(cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()));
-      return response;
-    } else {
-      throw new RuntimeException("Invalid token");
+        return String.valueOf(100000 + random.nextInt(900000));
     }
-  }
 
-  private String generateRegistrationCode() {
-    Random random = new Random();
+    private TokenResponse generateJwtTokens(User user) {
+        String accessToken = jwtService.createAccessToken(user);
+        String refreshToken = jwtService.createRefreshToken(user);
+        String accessTokenExpiration = jwtService.extractExpiration(accessToken).toString();
+        String refreshTokenExpiration = jwtService.extractExpiration(refreshToken).toString();
 
-    return String.valueOf(100000 + random.nextInt(900000));
-  }
-
-  private TokenResponse generateJwtTokens(User user) {
-    String accessToken = jwtService.createAccessToken(user);
-    String refreshToken = jwtService.createRefreshToken(user);
-    String accessTokenExpiration = jwtService.extractExpiration(accessToken).toString();
-    String refreshTokenExpiration = jwtService.extractExpiration(refreshToken).toString();
-
-    return TokenResponse.builder()
-        .accessToken(accessToken)
-        .refreshToken(refreshToken)
-        .accessTokenExpiration(accessTokenExpiration)
-        .refreshTokenExpiration(refreshTokenExpiration)
-        .build();
-  }
+        return TokenResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .accessTokenExpiration(accessTokenExpiration)
+                .refreshTokenExpiration(refreshTokenExpiration)
+                .build();
+    }
 }

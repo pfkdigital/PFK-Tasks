@@ -14,11 +14,11 @@ public class ProjectMapper {
     return Project.builder().title(request.getTitle()).imageUrl(request.getImageUrl()).build();
   }
 
-  public ProjectResponse mapToDto(Project taskList) {
+  public ProjectResponse mapToDto(Project project) {
     return ProjectResponse.builder()
-        .id(taskList.getId())
-        .title(taskList.getTitle())
-        .imageUrl(taskList.getImageUrl())
+        .id(project.getId())
+        .title(project.getTitle())
+        .imageUrl(project.getImageUrl())
         .build();
   }
 }
