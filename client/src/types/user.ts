@@ -1,9 +1,7 @@
 export interface UserType {
     username: string;
     email: string;
+    bio: string;
+    location: string;
     displayImageUrl: string;
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiration: string;
-    refreshTokenExpiration: string;
 };

@@ -22,8 +22,7 @@ import {authenticateSchema} from "@/schema/authenticate-schema";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {useToast} from "@/hooks/use-toast";
-import {AUTH_ACTIVATE, AUTH_LOGIN} from "@/constants/api-endpoints";
-import {ApiError} from "@/types/api-error";
+import {AUTH_LOGIN} from "@/constants/api-endpoints";
 
 export function LoginForm() {
 

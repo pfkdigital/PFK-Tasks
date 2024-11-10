@@ -9,3 +9,6 @@ export const AUTH_FORGOT_PASSWORD = `${BACKEND_API}/auth/forgot-password`;
 
 // Projects
 export const GET_PROJECTS = `${BACKEND_API}/projects`
+
+// User
+export const GET_USER = `${BACKEND_API}/user`
