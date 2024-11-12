@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { refreshTokens, verifyToken } from "./service/token-service";
 
-export async function middleware(request: NextRequest, response: NextResponse) {
+export async function middleware(request: NextRequest) {
   const DASHBOARD_PATH = /^\/dashboard(\/.*)?$/;
   const API_PATH = /^\/api(\/.*)?$/;
 
