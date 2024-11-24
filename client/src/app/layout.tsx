@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type {Metadata} from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
+import {ThemeProvider} from "@/components/theme-provider";
+import {Toaster} from "@/components/ui/toaster";
+import {AuthProvider} from "@/context/user-context";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -21,18 +22,20 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-    children,
-}: Readonly<{
+                                       children,
+                                   }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
         <html lang="en" className="dark" suppressHydrationWarning>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <ThemeProvider>
-                    {children}
-                    <Toaster />
-                </ThemeProvider>
-            </body>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider>
+            <AuthProvider>
+                {children}
+                <Toaster/>
+            </AuthProvider>
+        </ThemeProvider>
+        </body>
         </html>
     );
 }

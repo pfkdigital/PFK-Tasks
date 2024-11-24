@@ -117,10 +117,6 @@ export function EditProfileForm() {
               <FormLabel>Profile Picture</FormLabel>
               <FormControl>
                 <div className="flex items-center space-x-4">
-                  <Avatar className="border-primary border-2">
-                    <AvatarImage src={"https://github.com/shadcn.png"} />
-                    <AvatarFallback>NU</AvatarFallback>
-                  </Avatar>
                   <div>
                     <Input
                       type="file"

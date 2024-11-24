@@ -4,4 +4,5 @@ export interface UserType {
     bio: string;
     location: string;
     displayImageUrl: string;
-};
+    joinedAt: string;
+}

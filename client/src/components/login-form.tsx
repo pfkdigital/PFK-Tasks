@@ -12,7 +12,7 @@ import {
 import {Input} from "@/components/ui/input"
 import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
-import React from "react";
+import React, {useContext} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {navigateToGithubOauth, navigateToGoogleOauth} from "@/util/oauth-navigation";
@@ -23,9 +23,11 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {useToast} from "@/hooks/use-toast";
 import {AUTH_LOGIN} from "@/constants/api-endpoints";
+import {useAuth} from "@/context/user-context";
 
 export function LoginForm() {
 
+    const {setCurrentUser} = useAuth()
     const router = useRouter()
     const {toast} = useToast()
 
@@ -55,7 +57,7 @@ export function LoginForm() {
                 title: "Login successful",
                 description: "You have successfully logged in"
             })
-            localStorage.setItem("currentUser", result)
+            setCurrentUser(result)
             router.push("/dashboard");
         } catch (error) {
             console.error(error)

@@ -12,7 +12,7 @@ async function ProfileCard() {
     }
 
     return (
-        <Card>
+        <Card className={"bg-accent"}>
             <CardHeader className="flex flex-row items-center gap-4">
                 <Avatar className="h-16 w-16">
                     <AvatarImage src={"https://github.com/shadcn.png"} />

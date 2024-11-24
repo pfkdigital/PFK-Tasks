@@ -74,7 +74,7 @@ export const columns: ColumnDef<Task>[] = [
         header: "Task",
         cell: ({ row }) => {
             return (
-                <div className="flex space-x-2">
+                <div className="flex space-x">
                     <Badge variant="default">{row.getValue("id")}</Badge>
                 </div>
             )
@@ -94,6 +94,11 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
         cell: ({ row }) => <div className="w-[500px]">{row.getValue("title")}</div>,
+    },
+    {
+        accessorKey: "description",
+        header: "Description",
+        cell: ({ row }) => <div className="w-[500px]">{row.getValue("description")}</div>,
     },
     {
         accessorKey: "status",

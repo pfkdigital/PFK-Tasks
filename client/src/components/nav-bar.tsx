@@ -1,11 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { MdOutlineTaskAlt } from "react-icons/md";
-import { FaSignInAlt } from "react-icons/fa";
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useRouter } from 'next/navigation'
+import {MdOutlineTaskAlt} from "react-icons/md";
+import {FaSignInAlt} from "react-icons/fa";
+import {Button} from "@/components/ui/button"
+import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet"
+import {useRouter} from 'next/navigation'
 
 const NavBar = () => {
 
@@ -48,13 +48,15 @@ const NavBar = () => {
                 </Link>
             </nav>
             <div className={"ml-auto"}>
-                <Button
-                    className="shrink-0 hidden md:block"
-                    variant="outline"
-                    onClick={() => router.push("/sign-in")}
-                >
-                    <FaSignInAlt className="h-5 w-5"/>
-                </Button>
+                <Link href={"/sign-in"}>
+                    <Button
+                        className="shrink-0 hidden md:block"
+                        variant="outline"
+                        onClick={() => router.push("/sign-in")}
+                    >
+                        <FaSignInAlt className="h-5 w-5"/>
+                    </Button>
+                </Link>
             </div>
             <Sheet>
                 <SheetTrigger asChild>

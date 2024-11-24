@@ -10,5 +10,8 @@ export const AUTH_FORGOT_PASSWORD = `${BACKEND_API}/auth/forgot-password`;
 // Projects
 export const GET_PROJECTS = `${BACKEND_API}/projects`
 
+// Tasks
+export const GET_TASKS = `${BACKEND_API}/tasks`
+
 // User
 export const GET_USER = `${BACKEND_API}/user`

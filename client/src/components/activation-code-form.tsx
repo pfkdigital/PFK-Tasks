@@ -1,11 +1,10 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { toast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
+import {zodResolver} from "@hookform/resolvers/zod"
+import {useForm} from "react-hook-form"
+import {z} from "zod"
+import {toast} from "@/hooks/use-toast"
+import {Button} from "@/components/ui/button"
 import {
     Form,
     FormControl,
@@ -20,11 +19,11 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
-import { activationCodeSchema } from "@/schema/activation-code-schema";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import { ApiError } from "@/types/api-error";
-import { AUTH_ACTIVATE } from "@/constants/api-endpoints"
+import {activationCodeSchema} from "@/schema/activation-code-schema";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {useRouter} from "next/navigation";
+import {ApiError} from "@/types/api-error";
+import {AUTH_ACTIVATE} from "@/constants/api-endpoints"
 
 
 function InputOTPForm() {
@@ -74,25 +73,25 @@ function InputOTPForm() {
                         <FormField
                             control={form.control}
                             name="activationCode"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>One-Time Password</FormLabel>
                                     <FormControl>
                                         <InputOTP maxLength={6} {...field}>
                                             <InputOTPGroup>
-                                                <InputOTPSlot index={0} />
-                                                <InputOTPSlot index={1} />
-                                                <InputOTPSlot index={2} />
-                                                <InputOTPSlot index={3} />
-                                                <InputOTPSlot index={4} />
-                                                <InputOTPSlot index={5} />
+                                                <InputOTPSlot index={0}/>
+                                                <InputOTPSlot index={1}/>
+                                                <InputOTPSlot index={2}/>
+                                                <InputOTPSlot index={3}/>
+                                                <InputOTPSlot index={4}/>
+                                                <InputOTPSlot index={5}/>
                                             </InputOTPGroup>
                                         </InputOTP>
                                     </FormControl>
                                     <FormDescription>
                                         Please enter the one-time password sent to your phone.
                                     </FormDescription>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
