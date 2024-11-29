@@ -32,32 +32,32 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable String id) {
+    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Integer id) {
         return new ResponseEntity<>(projectService.getProjectById(id), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProjectResponse> updateProject(
-            @PathVariable String id, @RequestBody ProjectRequest projectRequest) {
+            @PathVariable Integer id, @RequestBody ProjectRequest projectRequest) {
         return new ResponseEntity<>(
                 projectService.updateProjectById(id, projectRequest), HttpStatus.OK);
     }
 
     @PutMapping("/{id}/tasks")
     public ResponseEntity<ProjectResponse> addTaskToProject(
-            @PathVariable String id, @RequestBody TaskRequest taskRequest) {
+            @PathVariable Integer id, @RequestBody TaskRequest taskRequest) {
         return new ResponseEntity<>(projectService.addTaskToProject(id, taskRequest), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProject(@PathVariable String id) {
+    public ResponseEntity<?> deleteProject(@PathVariable Integer id) {
         projectService.deleteProject(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}/tasks/{taskId}")
     public ResponseEntity<ProjectResponse> deleteTaskFromProject(
-            @PathVariable String id, @PathVariable String taskId) {
+            @PathVariable Integer id, @PathVariable Integer taskId) {
         return new ResponseEntity<>(projectService.deleteTaskFromProject(id, taskId), HttpStatus.OK);
     }
 }

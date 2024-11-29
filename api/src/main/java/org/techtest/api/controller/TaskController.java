@@ -29,36 +29,36 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskResponse> getTask(@PathVariable String id) {
+    public ResponseEntity<TaskResponse> getTask(@PathVariable Integer id) {
         return ResponseEntity.ok(taskService.getTask(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(
-            @PathVariable String id, @RequestBody TaskRequest request) {
+            @PathVariable Integer id, @RequestBody TaskRequest request) {
         return ResponseEntity.ok(taskService.updateTask(id, request));
     }
 
     @PutMapping("/{id}/status/{status}")
     public ResponseEntity<String> updateTaskStatus(
-            @PathVariable String id, @PathVariable String status) {
+            @PathVariable Integer id, @PathVariable String status) {
         return ResponseEntity.ok(taskService.updateTaskStatus(id, status));
     }
 
     @PutMapping("/{id}/steps")
     public ResponseEntity<TaskResponse> addTaskStep(
-            @PathVariable String id, @RequestBody TaskStepDTO request) {
+            @PathVariable Integer id, @RequestBody TaskStepDTO request) {
         return ResponseEntity.ok(taskService.addTaskStep(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTask(@PathVariable String id) {
+    public ResponseEntity<String> deleteTask(@PathVariable Integer id) {
         return ResponseEntity.ok(taskService.deleteTask(id));
     }
 
     @DeleteMapping("/{id}/steps/{stepId}")
     public ResponseEntity<TaskResponse> deleteTaskStep(
-            @PathVariable String id, @PathVariable String stepId) {
+            @PathVariable Integer id, @PathVariable Integer stepId) {
         return ResponseEntity.ok(taskService.deleteTaskStep(id, stepId));
     }
 }

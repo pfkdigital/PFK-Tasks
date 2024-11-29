@@ -1,12 +1,14 @@
 package org.techtest.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.techtest.api.dto.request.TaskRequest;
 import org.techtest.api.dto.response.TaskResponse;
 import org.techtest.api.dto.response.TaskStepDTO;
 import org.techtest.api.entity.Task;
 import org.techtest.api.entity.TaskStep;
+import org.techtest.api.entity.User;
 import org.techtest.api.enums.TaskPriority;
 import org.techtest.api.enums.TaskStatus;
 import org.techtest.api.exception.TaskNotFoundException;
@@ -34,12 +36,15 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalArgumentException("A task must have at least one task step");
         }
 
+        User currentUser = getCurrentUser();
+
         Task task =
                 Task.builder()
                         .title(request.getTitle())
                         .description(request.getDescription())
                         .status(TaskStatus.PENDING.name())
                         .priority(TaskPriority.valueOf(request.getPriority()))
+                        .user(currentUser)
                         .build();
 
         request.getTaskSteps().stream().map(taskStepMapper::mapToEntity).forEach(task::addTaskStep);
@@ -51,26 +56,31 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskResponse> getTasks() {
-        List<Task> tasks = taskRepository.findAll();
+        User currentUser = getCurrentUser();
+
+        List<Task> tasks = taskRepository.findTaskByUserId(currentUser.getId());
 
         return tasks.stream().map(taskMapper::mapToDto).collect(Collectors.toList());
     }
 
     @Override
-    public TaskResponse getTask(String id) {
+    public TaskResponse getTask(Integer id) {
+        User currentUser = getCurrentUser();
+
         Task task =
                 taskRepository
-                        .findById(id)
+                        .findTaskByIdAndUserId(id, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         return taskMapper.mapToDto(task);
     }
 
     @Override
-    public TaskResponse updateTask(String id, TaskRequest request) {
+    public TaskResponse updateTask(Integer id, TaskRequest request) {
+        User currentUser = getCurrentUser();
         Task task =
                 taskRepository
-                        .findById(id)
+                        .findTaskByIdAndUserId(id, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         Task updatedTask = taskMapper.mapToEntity(request);
@@ -87,10 +97,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public String updateTaskStatus(String id, String status) {
+    public String updateTaskStatus(Integer id, String status) {
+        User currentUser = getCurrentUser();
+
         Task task =
                 taskRepository
-                        .findById(id)
+                        .findTaskByIdAndUserId(id, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         task.setStatus(status);
@@ -99,10 +111,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse addTaskStep(String id, TaskStepDTO taskStepDTO) {
+    public TaskResponse addTaskStep(Integer id, TaskStepDTO taskStepDTO) {
+        User currentUser = getCurrentUser();
         Task task =
                 taskRepository
-                        .findById(id)
+                        .findTaskByIdAndUserId(id, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         task.addTaskStep(taskStepMapper.mapToEntity(taskStepDTO));
@@ -113,15 +126,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse deleteTaskStep(String id, String stepId) {
+    public TaskResponse deleteTaskStep(Integer id, Integer stepId) {
+        User currentUser = getCurrentUser();
+
         Task task =
                 taskRepository
-                        .findById(id)
+                        .findTaskByIdAndUserId(id, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         TaskStep taskStep =
                 taskStepRepository
-                        .findById(stepId)
+                        .findByTaskIdAndUserId(stepId, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task step not found with id: " + stepId));
 
         task.removeTaskStep(taskStep);
@@ -133,14 +148,21 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public String deleteTask(String id) {
+    public String deleteTask(Integer id) {
+
+        User currentUser = getCurrentUser();
+
         Task task =
                 taskRepository
-                        .findById(id)
+                        .findTaskByIdAndUserId(id, currentUser.getId())
                         .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
 
         taskRepository.delete(task);
 
         return "Task of id: " + id + " has been deleted successfully";
+    }
+
+    private User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

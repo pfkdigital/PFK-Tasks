@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskStepDTO {
-    private String id;
+    private Integer id;
     private String title;
     private String description;
     private String status;

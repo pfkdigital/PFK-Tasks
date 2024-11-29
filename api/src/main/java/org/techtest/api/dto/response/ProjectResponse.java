@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectResponse {
-    private String id;
+    private Integer id;
     private String title;
     private String imageUrl;
 }

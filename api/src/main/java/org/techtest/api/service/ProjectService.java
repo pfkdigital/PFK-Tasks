@@ -11,13 +11,13 @@ public interface ProjectService {
 
   List<ProjectResponse> getProjects();
 
-  ProjectResponse getProjectById(String id);
+  ProjectResponse getProjectById(Integer id);
 
-  ProjectResponse updateProjectById(String id, ProjectRequest projectRequest);
+  ProjectResponse updateProjectById(Integer id, ProjectRequest projectRequest);
 
-  ProjectResponse addTaskToProject(String id, TaskRequest taskRequest);
+  ProjectResponse addTaskToProject(Integer id, TaskRequest taskRequest);
 
-  ProjectResponse deleteTaskFromProject(String id, String taskId);
+  ProjectResponse deleteTaskFromProject(Integer id, Integer taskId);
 
-  void deleteProject(String id);
+  void deleteProject(Integer id);
 }

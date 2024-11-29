@@ -19,8 +19,7 @@ import java.util.List;
 public class Task extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @GenericGenerator(name = "custom-task-id", strategy = "org.techtest.api.util.CustomTaskIdGenerator")
-    private String id;
+    private Integer id;
     private String title;
     private String description;
     private String status;
@@ -29,11 +28,11 @@ public class Task extends BaseEntity {
     private TaskPriority priority;
 
     @ManyToOne
-    @JoinColumn(name = "projectId", insertable = false, updatable = false)
+    @JoinColumn(name = "projectId", updatable = false)
     private Project project;
 
     @ManyToOne
-    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    @JoinColumn(name = "userId", updatable = false)
     private User user;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -46,6 +45,8 @@ public class Task extends BaseEntity {
         taskStep.setTask(this);
         taskSteps.add(taskStep);
     }
+
+
 
     public void removeTaskStep(TaskStep taskStep) {
         taskSteps.remove(taskStep);

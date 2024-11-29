@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskResponse {
-    private String id;
+    private Integer id;
     private String title;
     private String description;
     private String status;

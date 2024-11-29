@@ -17,11 +17,9 @@ public interface AuthService {
 
   void activateAccount(ConfirmAccountRequest confirmAccountRequest);
 
-  void resendActivationToken(String activationCode) throws IOException, ResendException;
-
   UserResponse authenticate(AuthenticateRequest authenticateRequest, HttpServletResponse response);
 
-  HttpServletResponse refresh(HttpServletRequest request, HttpServletResponse response);
+  void refresh(HttpServletRequest request, HttpServletResponse response);
 
   MessageResponse logout(HttpServletRequest request);
 }

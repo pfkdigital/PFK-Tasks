@@ -13,13 +13,17 @@ import lombok.*;
 @Builder
 public class TaskStep extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Integer id;
     private String title;
     private String description;
     private String status;
 
     @ManyToOne
-    @JoinColumn(name="taskId",insertable = false, updatable = false)
+    @JoinColumn(name="taskId")
     private Task task;
+
+    @ManyToOne
+    @JoinColumn(name="userId")
+    private User user;
 }

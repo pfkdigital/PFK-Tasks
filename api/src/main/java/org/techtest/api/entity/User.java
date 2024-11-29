@@ -9,6 +9,7 @@ import org.techtest.api.enums.AuthProvider;
 import org.techtest.api.enums.Role;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,58 +21,66 @@ import java.util.List;
 @Setter
 @ToString
 @Builder
-public class User implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Integer id;
 
-  private String username;
-  private String password;
-  private String email;
-  private String bio;
-  private String location;
-  private String displayImageUrl;
-  private String activationToken;
-  private LocalDate activationTokenExpiryDate;
-  private String provider;
-  private boolean isEnabled;
-  private boolean isAccountNonExpired;
-  private boolean isAccountNonLocked;
-  private boolean isCredentialsNonExpired;
+    private String username;
+    private String password;
+    private String email;
+    private String bio;
+    private String location;
+    private String displayImageUrl;
+    private String activationToken;
+    private LocalDate activationTokenExpiryDate;
+    private String provider;
+    private boolean isEnabled;
+    private boolean isAccountNonExpired;
+    private boolean isAccountNonLocked;
+    private boolean isCredentialsNonExpired;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private List<Project> projects;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Project> projects;
 
-  public String getName() {
-    return username;
-  }
+    public String getName() {
+        return username;
+    }
 
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of(new SimpleGrantedAuthority(role.name()));
-  }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
 
-  @Override
-  public boolean isAccountNonExpired() {
-    return true;
-  }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-  @Override
-  public boolean isAccountNonLocked() {
-    return true;
-  }
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-  @Override
-  public boolean isCredentialsNonExpired() {
-    return true;
-  }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-  @Override
-  public boolean isEnabled() {
-    return isEnabled;
-  }
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void addProject(Project project) {
+        if (projects == null) {
+            projects = new ArrayList<>();
+        }
+        project.setUser(this);
+        projects.add(project);
+    }
 }

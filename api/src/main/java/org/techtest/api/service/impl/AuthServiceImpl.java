@@ -92,24 +92,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resendActivationToken(String activationCode)
-            throws IOException, RuntimeException, ResendException {
-        Optional<User> user = userRepository.findUserByActivationToken(activationCode);
-
-        if (user.isEmpty()) {
-            throw new RuntimeException("Activation token is invalid");
-        }
-        String activationToken = generateRegistrationCode();
-
-        user.get().setActivationToken(activationToken);
-        user.get().setActivationTokenExpiryDate(LocalDate.now().plusDays(1));
-
-        User updatedUser = userRepository.save(user.get());
-
-        emailService.sendEmail(updatedUser.getEmail(), updatedUser.getName(), activationToken);
-    }
-
-    @Override
     public UserResponse authenticate(
             AuthenticateRequest authenticateRequest, HttpServletResponse response) {
 
@@ -138,12 +120,15 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .displayImageUrl(user.getDisplayImageUrl())
+                .bio(user.getBio())
+                .location(user.getLocation())
                 .build();
     }
 
     @Override
-    public HttpServletResponse refresh(HttpServletRequest request, HttpServletResponse response) {
+    public void refresh(HttpServletRequest request, HttpServletResponse response) {
         String authHeader = request.getHeader("Authorization");
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new RuntimeException("Refresh token is missing");
         }
@@ -159,15 +144,12 @@ public class AuthServiceImpl implements AuthService {
                         .findByUsername(username)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (jwtService.validateToken(jwtToken, userDetails)) {
-            TokenResponse tokens = generateJwtTokens(userDetails);
-
-            response.addCookie(cookieUtil.createAccessTokenCookie(tokens.getAccessToken()));
-            response.addCookie(cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken()));
-            return response;
-        } else {
+        if (!jwtService.validateToken(jwtToken, userDetails)) {
             throw new RuntimeException("Invalid token");
         }
+        Cookie accessTokenCookie = cookieUtil.createAccessTokenCookie(jwtService.createAccessToken(userDetails));
+
+        response.addCookie(accessTokenCookie);
     }
 
     public MessageResponse logout(HttpServletRequest request) {
@@ -186,14 +168,10 @@ public class AuthServiceImpl implements AuthService {
     private TokenResponse generateJwtTokens(User user) {
         String accessToken = jwtService.createAccessToken(user);
         String refreshToken = jwtService.createRefreshToken(user);
-        String accessTokenExpiration = jwtService.extractExpiration(accessToken).toString();
-        String refreshTokenExpiration = jwtService.extractExpiration(refreshToken).toString();
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .accessTokenExpiration(accessTokenExpiration)
-                .refreshTokenExpiration(refreshTokenExpiration)
                 .build();
     }
 }

@@ -18,8 +18,7 @@ import java.util.List;
 public class Project extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @GenericGenerator(name = "custom-project-id", strategy = "org.techtest.api.util.CustomProjectIdGenerator")
-    private String id;
+    private Integer id;
     private String title;
     private String imageUrl;
 
@@ -27,7 +26,7 @@ public class Project extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Task> tasks;
 
     public void addTask(Task task) {

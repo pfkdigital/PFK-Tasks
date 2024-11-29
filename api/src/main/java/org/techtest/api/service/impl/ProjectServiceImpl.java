@@ -1,14 +1,15 @@
 package org.techtest.api.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.techtest.api.dto.request.ProjectRequest;
 import org.techtest.api.dto.request.TaskRequest;
 import org.techtest.api.dto.response.ProjectResponse;
 import org.techtest.api.entity.Project;
 import org.techtest.api.entity.Task;
+import org.techtest.api.entity.User;
 import org.techtest.api.exception.ProjectNotFoundException;
-import org.techtest.api.exception.TaskListNotFoundException;
 import org.techtest.api.exception.TaskNotFoundException;
 import org.techtest.api.mapper.ProjectMapper;
 import org.techtest.api.mapper.TaskMapper;
@@ -22,89 +23,106 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
-  private final ProjectRepository projectRepository;
-  private final ProjectMapper projectMapper;
-  private final TaskMapper taskMapper;
-  private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
+    private final TaskMapper taskMapper;
+    private final TaskRepository taskRepository;
 
-  public ProjectResponse createProject(ProjectRequest projectRequest) {
-    Project project = projectMapper.mapToEntity(projectRequest);
+    public ProjectResponse createProject(ProjectRequest projectRequest) {
+        Project project = projectMapper.mapToEntity(projectRequest);
 
-    project.setTasks(List.of());
+        project.setTasks(List.of());
 
-    Project savedTaskList = projectRepository.save(project);
+        User currentUser = getCurrentUser();
 
-    return projectMapper.mapToDto(savedTaskList);
-  }
+        project.setUser(currentUser);
 
-  public List<ProjectResponse> getProjects() {
-    List<Project> projects = projectRepository.findAll();
+        Project savedTaskList = projectRepository.save(project);
 
-    return projects.stream().map(projectMapper::mapToDto).toList();
-  }
+        return projectMapper.mapToDto(savedTaskList);
+    }
 
-  public ProjectResponse getProjectById(String id) {
-    Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+    public List<ProjectResponse> getProjects() {
+        User currentUser = getCurrentUser();
+        List<Project> projects = projectRepository.findProjectsByUserId(currentUser.getId());
 
-    return projectMapper.mapToDto(project);
-  }
+        return projects.stream().map(projectMapper::mapToDto).toList();
+    }
 
-  public ProjectResponse updateProjectById(String id, ProjectRequest projectRequest) {
-    Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+    public ProjectResponse getProjectById(Integer id) {
+        User currentUser = getCurrentUser();
 
-    project.setTitle(projectRequest.getTitle());
-    project.setImageUrl(projectRequest.getImageUrl());
+        Project project =
+                projectRepository
+                        .findProjectByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
 
-    Project updatedProject = projectRepository.save(project);
+        return projectMapper.mapToDto(project);
+    }
 
-    return projectMapper.mapToDto(updatedProject);
-  }
+    public ProjectResponse updateProjectById(Integer id, ProjectRequest projectRequest) {
+        User currentUser = getCurrentUser();
 
-  public ProjectResponse addTaskToProject(String id, TaskRequest taskRequest) {
-    Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+        Project project =
+                projectRepository
+                        .findProjectByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
 
-    Task task = taskMapper.mapToEntity(taskRequest);
+        project.setTitle(projectRequest.getTitle());
+        project.setImageUrl(projectRequest.getImageUrl());
 
-    project.addTask(task);
+        Project updatedProject = projectRepository.save(project);
 
-    Project updatedProject = projectRepository.save(project);
+        return projectMapper.mapToDto(updatedProject);
+    }
 
-    return projectMapper.mapToDto(updatedProject);
-  }
+    public ProjectResponse addTaskToProject(Integer id, TaskRequest taskRequest) {
+        User currentUser = getCurrentUser();
 
-  public ProjectResponse deleteTaskFromProject(String id, String taskId) {
-    Project project =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+        Project project =
+                projectRepository
+                        .findProjectByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
 
-    Task task =
-        taskRepository
-            .findById(taskId)
-            .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + taskId));
+        Task task = taskMapper.mapToEntity(taskRequest);
 
-    project.removeTask(task);
+        project.addTask(task);
 
-    Project updatedProject = projectRepository.save(project);
+        Project updatedProject = projectRepository.save(project);
 
-    return projectMapper.mapToDto(updatedProject);
-  }
+        return projectMapper.mapToDto(updatedProject);
+    }
 
-  public void deleteProject(String id) {
-    Project taskList =
-        projectRepository
-            .findById(id)
-            .orElseThrow(() -> new TaskListNotFoundException("Task list not found with id: " + id));
+    public ProjectResponse deleteTaskFromProject(Integer id, Integer taskId) {
+        User currentUser = getCurrentUser();
 
-    projectRepository.delete(taskList);
-  }
+        Project project =
+                projectRepository
+                        .findProjectByIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+
+        Task task =
+                taskRepository
+                        .findTasksByProjectIdAndUserId(id, currentUser.getId())
+                        .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + taskId));
+
+        project.removeTask(task);
+
+        Project updatedProject = projectRepository.save(project);
+
+        return projectMapper.mapToDto(updatedProject);
+    }
+
+    public void deleteProject(Integer id) {
+        Project taskList =
+                projectRepository
+                        .findProjectByIdAndUserId(id, getCurrentUser().getId())
+                        .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
+
+        projectRepository.delete(taskList);
+    }
+
+    private User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
 }

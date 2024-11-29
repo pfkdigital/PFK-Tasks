@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -27,6 +28,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
+
+  @Value("${cors.allowed.origins}")
+  private String allowedOrigins;
 
   private final CookieUtil cookieUtil;
   private final JwtService jwtService;
@@ -68,11 +72,9 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
     TokenResponse tokens = generateJwtTokens(oauthUser);
 
     Cookie accessTokenCookie = cookieUtil.createAccessTokenCookie(tokens.getAccessToken());
-    Cookie refreshTokenCookie = cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken());
 
     response.addCookie(accessTokenCookie);
-    response.addCookie(refreshTokenCookie);
-    response.sendRedirect("http://localhost:3000/dashboard");
+    response.sendRedirect(allowedOrigins + "/dashboard");
   }
 
   private User processOauth2Google(Map<String, Object> attributes) {

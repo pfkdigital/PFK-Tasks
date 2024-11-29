@@ -23,6 +23,7 @@ public class UserServiceImpl implements UserService {
                 .displayImageUrl(currentUser.getDisplayImageUrl())
                 .bio(currentUser.getBio())
                 .location(currentUser.getLocation())
+                .joinedAt(currentUser.getCreatedDate())
                 .build();
     }
 }
