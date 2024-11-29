@@ -1,30 +1,40 @@
-import {cookies} from "next/headers";
 import {AUTH_REFRESH} from "@/constants/api-endpoints";
-import {ApiError} from "@/types/api-error";
+import {NextResponse} from "next/server";
+import {ResponseCookies} from "next/dist/compiled/@edge-runtime/cookies";
+import {cookies} from "next/headers";
 
-export async function POST() {
-    const cookieStore = cookies();
-    const refreshToken = cookieStore.get("refreshToken")?.value;
-
+export async function GET(request: Request) {
     try {
-        const response = await fetch(AUTH_REFRESH,{
+        const cookieStore = cookies()
+        const refreshToken = cookieStore.get("refreshToken")
+
+        const response = await fetch(AUTH_REFRESH, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-            },
-            credentials: "include",
+                "Authorization": `Bearer ${refreshToken}`
+            }
         })
 
         if (!response.ok) {
-            const error: ApiError = await response.json();
-            throw new Error(error.message);
+            NextResponse.json({message: "Unable to refresh token"},{status: 402})
         }
 
-        cookieStore.delete("accessToken");
-        cookieStore.delete("refreshToken");
+        const responseCookies = new ResponseCookies(response.headers);
+        const refreshCookie = responseCookies.get("accessToken")
+        console.log(refreshCookie)
+        if (!refreshCookie) {
+            return NextResponse.json({message: "Unable to refresh token"},{status: 402})
+        }
 
-        return response
+        cookies().set("accessToken", refreshCookie?.value, {
+            expires: refreshCookie.expires,
+            httpOnly: true,
+            path: "/",
+            secure: true
+        })
+        return NextResponse.json({accessToken: refreshCookie.value});
     } catch (e) {
-
+        NextResponse.json({message: "Unable to refresh token"},{status: 402})
     }
 }

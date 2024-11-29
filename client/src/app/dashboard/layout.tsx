@@ -5,11 +5,11 @@ import React from "react";
 const Layout = ({ children }: { children: React.ReactNode }) => {
     return (
         <main className="flex justify-start">
-            <div className="relative ">
-                <SidebarProvider>
-                    <DashboardSidebar />
-                </SidebarProvider>
-            </div>
+            {/*<div className="relative ">*/}
+            {/*    <SidebarProvider>*/}
+            {/*        <DashboardSidebar />*/}
+            {/*    </SidebarProvider>*/}
+            {/*</div>*/}
             <section className="w-full px-2">
                 {children}
             </section>

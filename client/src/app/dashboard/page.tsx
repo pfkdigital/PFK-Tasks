@@ -1,9 +1,11 @@
 import {DataTable} from '@/components/data-table'
-import {getTasks} from '@/util/api'
 import EmptyDataTable from "@/components/empty-data-table";
 
-export default async function TaskPage() {
-    const tasks = await getTasks()
+export default async function DashboardPage() {
+    const response = await fetch("http://localhost:3000/api/tasks", {cache: "no-store"})
+
+    console.log(await response.json())
+    const tasks = []
 
     if (!tasks) return null
 

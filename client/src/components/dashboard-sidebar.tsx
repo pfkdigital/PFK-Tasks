@@ -14,16 +14,16 @@ import {
     SidebarProvider,
     SidebarRail,
 } from "@/components/ui/sidebar"
-import {getProjects, getUser} from "@/util/api"
-import {UserType} from "@/types/user"
 import {LogoutButton} from "./sign-out-button"
 import Link from "next/link"
-import {ProjectType} from "@/types/project"
 import {NoProjects} from "./no-projects"
+import {getProjects, getUser} from "@/util/api";
+import {ProjectType} from "@/types/project";
+import {UserType} from "@/types/user";
 
 export default async function DashboardSidebar() {
-    const user: UserType = await getUser()
-    const projects: ProjectType[] = await getProjects()
+    const user: UserType | undefined = await getUser()
+    const projects: ProjectType[] | undefined = await getProjects()
 
     if (!user) return null
 
@@ -35,7 +35,7 @@ export default async function DashboardSidebar() {
                         <Avatar className="border-primary border-2">
                             <AvatarImage src={user.displayImageUrl || "https://github.com/shadcn.png"}
                                          alt={user.username}/>
-                            <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                            <AvatarFallback>{user?.username?.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
                             <span className="text-sm font-semibold">{user.username}</span>

@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/
 import { UserType } from "@/types/user"
 
 async function ProfileCard() {
-    const user: UserType = await getUser()
+    const user: UserType | undefined = await getUser()
 
     if (!user) {
         return null

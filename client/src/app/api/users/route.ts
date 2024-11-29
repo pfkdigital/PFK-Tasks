@@ -1,5 +1,5 @@
 import { NextResponse} from "next/server";
-import getAccessToken from "@/util/token-service";
+import getAccessToken from "@/util/get-access-token";
 import {GET_USER} from "@/constants/api-endpoints";
 
 export async function GET() {
