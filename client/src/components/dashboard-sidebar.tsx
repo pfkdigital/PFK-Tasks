@@ -17,13 +17,13 @@ import {
 import {LogoutButton} from "./sign-out-button"
 import Link from "next/link"
 import {NoProjects} from "./no-projects"
-import {getProjects, getUser} from "@/util/api";
 import {ProjectType} from "@/types/project";
 import {UserType} from "@/types/user";
+import pfkTasksClient from "@/client/api-client";
 
 export default async function DashboardSidebar() {
-    const user: UserType | undefined = await getUser()
-    const projects: ProjectType[] | undefined = await getProjects()
+    const user: UserType | undefined = await pfkTasksClient.get("/user").then((response) => response.json())
+    const projects: ProjectType[] | undefined = await pfkTasksClient.get("/projects").then((response) => response.json())
 
     if (!user) return null
 

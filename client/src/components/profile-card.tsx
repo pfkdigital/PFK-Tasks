@@ -1,11 +1,12 @@
-import { getUser } from "@/util/api"
+
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { Label } from "@radix-ui/react-label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card"
 import { UserType } from "@/types/user"
+import pfkTasksClient from "@/client/api-client";
 
 async function ProfileCard() {
-    const user: UserType | undefined = await getUser()
+    const user: UserType | undefined = await pfkTasksClient.get("/user").then((response) => response.json())
 
     if (!user) {
         return null

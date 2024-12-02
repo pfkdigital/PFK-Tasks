@@ -24,6 +24,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/
 import {useToast} from "@/hooks/use-toast";
 import {AUTH_LOGIN} from "@/constants/api-endpoints";
 import {useAuth} from "@/context/user-context";
+import {loginUser} from "@/client/auth";
 
 export function LoginForm() {
 
@@ -40,32 +41,19 @@ export function LoginForm() {
     })
 
     const onSubmit = async (data: z.infer<typeof authenticateSchema>) => {
-        try {
-            const response = await fetch(AUTH_LOGIN, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) {
-                throw new Error("Failed to login");
-            }
-            const result = await response.json()
+        loginUser(data).then(() => {
             toast({
                 title: "Login successful",
                 description: "You have successfully logged in"
             })
-            setCurrentUser(result)
             router.push("/dashboard");
-        } catch (error) {
+        }).catch(error => {
             console.error(error)
             toast({
                 title: "Failed to login",
                 description: "Please try again"
             });
-        }
+        })
     };
 
     return (

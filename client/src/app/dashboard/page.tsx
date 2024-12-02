@@ -1,12 +1,9 @@
 import {DataTable} from '@/components/data-table'
 import EmptyDataTable from "@/components/empty-data-table";
+import pfkTasksClient from "@/client/api-client";
 
 export default async function DashboardPage() {
-    const response = await fetch("http://localhost:3000/api/tasks", {cache: "no-store"})
-
-    console.log(await response.json())
-    const tasks = []
-
+    const tasks = await pfkTasksClient.get('/tasks').then((response) => response.json())
     if (!tasks) return null
 
     return (
