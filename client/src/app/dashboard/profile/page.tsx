@@ -1,8 +1,8 @@
 import {Suspense} from 'react'
 
-import ProfileCard from '@/components/profile-card'
-import ProfileSkeleton from '@/components/profile-skeleton'
-import EditProfileForm from '@/components/edit-profile-form'
+import ProfileCard from '@/components/profile-page/profile-card'
+import ProfileSkeleton from '@/components/profile-page/profile-skeleton'
+import EditProfileForm from '@/components/profile-page/edit-profile-form'
 
 async function ProfilePage() {
     return (

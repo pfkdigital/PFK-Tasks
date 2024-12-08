@@ -1,5 +1,5 @@
 import React from 'react';
-import InputOTPForm from "@/components/activation-code-form";
+import InputOTPForm from "@/components/sign-up-form/activation-code-form";
 
 const ActivateAccount = () => {
     return (

@@ -1,4 +1,4 @@
-import NavBar from "@/components/nav-bar";
+import NavBar from "@/components/nav-bar/nav-bar";
 
 
 function LandingLayout({ children }:{children: React.ReactNode}) {

@@ -71,7 +71,7 @@ export default async function DashboardSidebar() {
                                 {projects.map((project) => (
                                     <SidebarMenuItem key={project.id}>
                                         <SidebarMenuButton asChild>
-                                            <Link href={`/project/${project.id}`} className="flex items-center gap-3">
+                                            <Link href={`/dashboard/project/${project.id}`} className="flex items-center gap-3">
                                                 <Folder className="h-4 w-4"/>
                                                 <span>{project.title}</span>
                                             </Link>

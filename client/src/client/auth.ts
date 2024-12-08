@@ -4,17 +4,16 @@ import {cookies} from "next/headers";
 import {ApiClient} from "@/client/api-client";
 import {AuthenticateSchema} from "@/schema/authenticate-schema";
 
-export async function loginUser(data: AuthenticateSchema) {
+export async function logInUser(data: AuthenticateSchema) {
     const api = ApiClient.getInstance()
 
     try {
-        const response = await api.post('/auth/sign-in', data)
+        const response = await api.post('/auth/authenticate', data)
 
         if (!response.ok) {
             throw new Error('Login failed')
         }
 
-        // No need to manually set cookies, as the server should set them
         return response
     } catch (error) {
         console.error('Login error:', error)

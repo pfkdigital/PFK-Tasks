@@ -1,5 +1,5 @@
-import {DataTable} from '@/components/data-table'
-import EmptyDataTable from "@/components/empty-data-table";
+import {DataTable} from '@/components/data-table/data-table'
+import EmptyDataTable from "@/components/data-table/empty-data-table";
 import pfkTasksClient from "@/client/api-client";
 
 export default async function DashboardPage() {

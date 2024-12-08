@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { PlusCircleIcon, TableIcon } from 'lucide-react'
 
@@ -9,6 +11,7 @@ export default function EmptyDataTable({
     title?: string
     description?: string
     actionLabel?: string
+    action?: () => void
 }) {
     return (<div className="flex flex-col items-center justify-center h-[400px] border rounded-md bg-background">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">

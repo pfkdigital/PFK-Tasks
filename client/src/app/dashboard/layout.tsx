@@ -1,4 +1,4 @@
-import DashboardSidebar from "@/components/dashboard-sidebar";
+import DashboardSidebar from "@/components/dashboard-side-bar/dashboard-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import React from "react";
 
@@ -10,7 +10,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     <DashboardSidebar />
                 </SidebarProvider>
             </div>
-            <section className="w-full px-2">
+            <section className="w-full px-4">
                 {children}
             </section>
         </main>

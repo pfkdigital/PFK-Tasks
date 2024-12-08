@@ -13,19 +13,18 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import {ArrowUpDown, MoreHorizontal, Plus} from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import {Button} from "@/components/ui/button"
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import {Input} from "@/components/ui/input"
 import {
     Table,
     TableBody,
@@ -34,7 +33,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import {Badge} from "@/components/ui/badge"
 import {
     Sheet,
     SheetContent,
@@ -42,6 +41,10 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet"
+import {ScrollArea} from "@/components/ui/scroll-area"
+import {Checkbox} from "@/components/ui/checkbox";
+import {Label} from "@/components/ui/label";
+import {Textarea} from "@/components/ui/textarea";
 
 export enum TaskPriority {
     LOW = "LOW",
@@ -62,7 +65,7 @@ export interface Task {
     title: string;
     description: string;
     status: string;
-    priority: TaskPriority;
+    priority: string;
     projectId: string;
     userId: string;
     taskSteps: TaskStep[];
@@ -72,7 +75,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: "id",
         header: "Task",
-        cell: ({ row }) => {
+        cell: ({row}) => {
             return (
                 <div className="flex space-x">
                     <Badge variant="default">{row.getValue("id")}</Badge>
@@ -82,35 +85,35 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: "title",
-        header: ({ column }) => {
+        header: ({column}) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
                     Title
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="ml-2 h-4 w-4"/>
                 </Button>
             )
         },
-        cell: ({ row }) => <div className="w-[500px]">{row.getValue("title")}</div>,
+        cell: ({row}) => <div className="w-[500px]">{row.getValue("title")}</div>,
     },
     {
         accessorKey: "description",
         header: "Description",
-        cell: ({ row }) => <div className="w-[500px]">{row.getValue("description")}</div>,
+        cell: ({row}) => <div className="w-[500px]">{row.getValue("description")}</div>,
     },
     {
         accessorKey: "status",
         header: "Status",
-        cell: ({ row }) => (
+        cell: ({row}) => (
             <div className="capitalize">{row.getValue("status")}</div>
         ),
     },
     {
         accessorKey: "priority",
         header: "Priority",
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const priority = row.getValue("priority") as string
             return (
                 <Badge
@@ -130,7 +133,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: "actions",
         enableHiding: false,
-        cell: ({ row }) => {
+        cell: ({row}) => {
             const task = row.original
 
             return (
@@ -138,7 +141,7 @@ export const columns: ColumnDef<Task>[] = [
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="h-4 w-4"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -148,7 +151,7 @@ export const columns: ColumnDef<Task>[] = [
                         >
                             Copy task ID
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator/>
                         <DropdownMenuItem>View task details</DropdownMenuItem>
                         <DropdownMenuItem>View project</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -158,7 +161,7 @@ export const columns: ColumnDef<Task>[] = [
     },
 ]
 
-export function DataTable({ data }: { data: Task[] }) {
+export function DataTable({data}: { data: Task[] }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -167,6 +170,8 @@ export function DataTable({ data }: { data: Task[] }) {
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [selectedTask, setSelectedTask] = React.useState<Task | null>(null)
+    const [newStepTitle, setNewStepTitle] = React.useState("")
+    const [newStepDescription, setNewStepDescription] = React.useState("")
 
     const table = useReactTable({
         data,
@@ -193,6 +198,35 @@ export function DataTable({ data }: { data: Task[] }) {
 
     const handleCloseDrawer = () => {
         setSelectedTask(null)
+        setNewStepTitle("")
+        setNewStepDescription("")
+    }
+
+    const handleStepStatusChange = (stepId: string) => {
+        if (selectedTask) {
+            const updatedSteps = selectedTask.taskSteps.map(step =>
+                step.id === stepId ? {...step, status: step.status === "COMPLETED" ? "IN_PROGRESS" : "COMPLETED"} : step
+            )
+            setSelectedTask({...selectedTask, taskSteps: updatedSteps})
+        }
+    }
+
+    const handleAddNewStep = () => {
+        if (selectedTask && newStepTitle.trim() !== "") {
+            const newStep: TaskStep = {
+                id: `step-${Date.now()}`,
+                title: newStepTitle,
+                description: newStepDescription,
+                status: "IN_PROGRESS",
+                taskId: selectedTask.id,
+            }
+            setSelectedTask({
+                ...selectedTask,
+                taskSteps: [...selectedTask.taskSteps, newStep],
+            })
+            setNewStepTitle("")
+            setNewStepDescription("")
+        }
     }
 
     return (
@@ -206,32 +240,6 @@ export function DataTable({ data }: { data: Task[] }) {
                     }
                     className="max-w-sm"
                 />
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -304,48 +312,95 @@ export function DataTable({ data }: { data: Task[] }) {
                 </div>
             </div>
             <Sheet open={!!selectedTask} onOpenChange={handleCloseDrawer}>
-                <SheetContent>
+                <SheetContent className="sm:max-w-[540px]">
                     {selectedTask && (
-                        <>
-                            <SheetHeader>
+                        <ScrollArea className="h-[calc(100vh-80px)] pr-4">
+                            <SheetHeader className="mb-6">
                                 <SheetTitle>{selectedTask.title}</SheetTitle>
                                 <SheetDescription>{selectedTask.description}</SheetDescription>
                             </SheetHeader>
-                            <div className="mt-6 space-y-4">
-                                <div>
-                                    <h3 className="font-semibold">Status</h3>
-                                    <p>{selectedTask.status}</p>
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Status</h3>
+                                        <Badge variant="outline">{selectedTask.status}</Badge>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Priority</h3>
+                                        <Badge
+                                            variant={
+                                                selectedTask.priority === "HIGH"
+                                                    ? "destructive"
+                                                    : selectedTask.priority === "MEDIUM"
+                                                        ? "default"
+                                                        : "secondary"
+                                            }
+                                        >
+                                            {selectedTask.priority}
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Project ID</h3>
+                                        <p className="text-sm text-muted-foreground">{selectedTask.projectId}</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold mb-2">User ID</h3>
+                                        <p className="text-sm text-muted-foreground">{selectedTask.userId}</p>
+                                    </div>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold">Priority</h3>
-                                    <p>{selectedTask.priority}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Project ID</h3>
-                                    <p>{selectedTask.projectId}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">User ID</h3>
-                                    <p>{selectedTask.userId}</p>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Task Steps</h3>
+                                    <h3 className="font-semibold mb-2">Task Steps</h3>
                                     {selectedTask.taskSteps.length > 0 ? (
-                                        <ul className="list-disc pl-5">
+                                        <div className="space-y-4">
                                             {selectedTask.taskSteps.map((step) => (
-                                                <li key={step.id}>
-                                                    <p className="font-medium">{step.title}</p>
-                                                    <p className="text-sm text-gray-600">{step.description}</p>
-                                                    <p className="text-sm text-gray-600">Status: {step.status}</p>
-                                                </li>
+                                                <div key={step.id} className="flex items-start space-x-2">
+                                                    <Checkbox
+                                                        id={step.id}
+                                                        checked={step.status === "COMPLETED"}
+                                                        onCheckedChange={() => handleStepStatusChange(step.id)}
+                                                    />
+                                                    <div className="grid gap-1.5 leading-none">
+                                                        <label
+                                                            htmlFor={step.id}
+                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                        >
+                                                            {step.title}
+                                                        </label>
+                                                        <p className="text-sm text-muted-foreground">{step.description}</p>
+                                                    </div>
+                                                </div>
                                             ))}
-                                        </ul>
+                                        </div>
                                     ) : (
-                                        <p>No steps for this task.</p>
+                                        <p className="text-sm text-muted-foreground">No steps for this task.</p>
                                     )}
                                 </div>
+                                <div className="space-y-4">
+                                    <h3 className="font-semibold">Add New Step</h3>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="new-step-title">Step Title</Label>
+                                        <Input
+                                            id="new-step-title"
+                                            value={newStepTitle}
+                                            onChange={(e) => setNewStepTitle(e.target.value)}
+                                            placeholder="Enter step title"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="new-step-description">Step Description</Label>
+                                        <Textarea
+                                            id="new-step-description"
+                                            value={newStepDescription}
+                                            onChange={(e) => setNewStepDescription(e.target.value)}
+                                            placeholder="Enter step description"
+                                        />
+                                    </div>
+                                    <Button onClick={handleAddNewStep} className="w-full">
+                                        <Plus className="mr-2 h-4 w-4"/> Add Step
+                                    </Button>
+                                </div>
                             </div>
-                        </>
+                        </ScrollArea>
                     )}
                 </SheetContent>
             </Sheet>
