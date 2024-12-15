@@ -1,11 +1,11 @@
 package org.techtest.api.util;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.techtest.api.entity.User;
 import org.techtest.api.entity.Project;
 import org.techtest.api.entity.Task;
 import org.techtest.api.entity.TaskStep;
-import org.springframework.stereotype.Component;
 import org.techtest.api.enums.Role;
 import org.techtest.api.enums.TaskPriority;
 import org.techtest.api.repository.ProjectRepository;
@@ -14,6 +14,7 @@ import org.techtest.api.repository.TaskStepRepository;
 import org.techtest.api.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -21,13 +22,9 @@ import java.util.List;
 public class MockDataSeeder {
 
     private final UserRepository userRepository;
-
     private final ProjectRepository projectRepository;
-
     private final TaskRepository taskRepository;
-
     private final TaskStepRepository taskStepRepository;
-
 
     public void run() {
         // Create a mock user
@@ -52,12 +49,60 @@ public class MockDataSeeder {
 
         // Create mock projects
         List<Project> projects = List.of(
-                Project.builder().title("E-Commerce Platform").imageUrl("https://example.com/images/ecommerce.png").user(user).build(),
-                Project.builder().title("Healthcare Management System").imageUrl("https://example.com/images/healthcare.png").user(user).build(),
-                Project.builder().title("Social Media Dashboard").imageUrl("https://example.com/images/social.png").user(user).build(),
-                Project.builder().title("Task Manager App").imageUrl("https://example.com/images/task.png").user(user).build(),
-                Project.builder().title("Financial Portfolio Tracker").imageUrl("https://example.com/images/finance.png").user(user).build(),
-                Project.builder().title("Inventory Management System").imageUrl("https://example.com/images/inventory.png").user(user).build()
+                Project.builder()
+                        .title("E-Commerce Platform")
+                        .imageUrl("https://example.com/images/ecommerce.png")
+                        .description("An e-commerce platform for online shopping.")
+                        .startDate(LocalDateTime.now().minusMonths(1))
+                        .endDate(LocalDateTime.now().plusMonths(1))
+                        .status("IN_PROGRESS")
+                        .user(user)
+                        .build(),
+                Project.builder()
+                        .title("Healthcare Management System")
+                        .imageUrl("https://example.com/images/healthcare.png")
+                        .description("A system to manage healthcare records.")
+                        .startDate(LocalDateTime.now().minusMonths(2))
+                        .endDate(LocalDateTime.now().plusMonths(2))
+                        .status("COMPLETED")
+                        .user(user)
+                        .build(),
+                Project.builder()
+                        .title("Social Media Dashboard")
+                        .imageUrl("https://example.com/images/social.png")
+                        .description("A dashboard for social media analytics.")
+                        .startDate(LocalDateTime.now().minusMonths(3))
+                        .endDate(LocalDateTime.now().plusMonths(3))
+                        .status("NOT_STARTED")
+                        .user(user)
+                        .build(),
+                Project.builder()
+                        .title("Task Manager App")
+                        .imageUrl("https://example.com/images/task.png")
+                        .description("An app to manage tasks and projects.")
+                        .startDate(LocalDateTime.now().minusMonths(4))
+                        .endDate(LocalDateTime.now().plusMonths(4))
+                        .status("IN_PROGRESS")
+                        .user(user)
+                        .build(),
+                Project.builder()
+                        .title("Financial Portfolio Tracker")
+                        .imageUrl("https://example.com/images/finance.png")
+                        .description("A tool to track financial portfolios.")
+                        .startDate(LocalDateTime.now().minusMonths(5))
+                        .endDate(LocalDateTime.now().plusMonths(5))
+                        .status("COMPLETED")
+                        .user(user)
+                        .build(),
+                Project.builder()
+                        .title("Inventory Management System")
+                        .imageUrl("https://example.com/images/inventory.png")
+                        .description("A system to manage inventory.")
+                        .startDate(LocalDateTime.now().minusMonths(6))
+                        .endDate(LocalDateTime.now().plusMonths(6))
+                        .status("NOT_STARTED")
+                        .user(user)
+                        .build()
         );
 
         projectRepository.saveAll(projects);

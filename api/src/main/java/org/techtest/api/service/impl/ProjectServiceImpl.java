@@ -69,7 +69,11 @@ public class ProjectServiceImpl implements ProjectService {
                         .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + id));
 
         project.setTitle(projectRequest.getTitle());
+        project.setDescription(projectRequest.getDescription());
+        project.setStartDate(projectRequest.getStartDate());
+        project.setEndDate(projectRequest.getEndDate());
         project.setImageUrl(projectRequest.getImageUrl());
+        project.setStatus(projectRequest.getStatus());
 
         Project updatedProject = projectRepository.save(project);
 

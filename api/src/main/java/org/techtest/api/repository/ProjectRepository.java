@@ -13,6 +13,6 @@ public interface ProjectRepository extends JpaRepository<Project, String> {
     @Query("SELECT p FROM Project p WHERE p.user.id = :userId")
     List<Project> findProjectsByUserId(@Param("userId") Integer userId);
 
-    @Query("SELECT p FROM Project p WHERE p.id = :projectId AND p.user.id = :userId")
+    @Query("SELECT p FROM Project p LEFT JOIN FETCH p.tasks WHERE p.id = :projectId AND p.user.id = :userId")
     Optional<Project> findProjectByIdAndUserId(@Param("projectId") Integer projectId, @Param("userId") Integer userId);
 }

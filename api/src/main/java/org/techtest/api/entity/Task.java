@@ -46,8 +46,6 @@ public class Task extends BaseEntity {
         taskSteps.add(taskStep);
     }
 
-
-
     public void removeTaskStep(TaskStep taskStep) {
         taskSteps.remove(taskStep);
     }

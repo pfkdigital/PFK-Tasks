@@ -8,9 +8,8 @@ public class CookieUtil {
 
     public Cookie createAccessTokenCookie(String value) {
         Cookie cookie = new Cookie("accessToken", value);
-        cookie.setMaxAge(3 * 60 * 60);
+        cookie.setMaxAge(60);
         cookie.setPath("/");
-        cookie.setHttpOnly(true);
         cookie.setSecure(true);
         return cookie;
     }
@@ -19,7 +18,6 @@ public class CookieUtil {
         Cookie cookie = new Cookie("refreshToken", value);
         cookie.setMaxAge(24 * 60 * 60);
         cookie.setPath("/");
-        cookie.setHttpOnly(true);
         cookie.setSecure(true);
         return cookie;
     }
