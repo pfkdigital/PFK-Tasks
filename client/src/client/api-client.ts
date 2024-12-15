@@ -1,8 +1,9 @@
-import { cookies } from 'next/headers'
+// ApiClient.ts
+import {getCookie, CookieValueTypes } from 'cookies-next';
 
 export class ApiClient {
-    private static instance: ApiClient
-    private readonly baseUrl: string
+    private static instance: ApiClient;
+    private readonly baseUrl: string;
 
     // Private constructor to prevent direct instantiation
     private constructor() {
@@ -18,8 +19,8 @@ export class ApiClient {
     }
 
     // Universal token retrieval
-    private getToken(): string | null {
-        return cookies().get('accessToken')?.value || null
+    private getToken(): CookieValueTypes {
+        return getCookie('accessToken')
     }
 
     // Universal fetch method
@@ -30,6 +31,7 @@ export class ApiClient {
     ): Promise<Response> {
         const url = `${this.baseUrl}${endpoint}`
         const token = this.getToken()
+
 
         const fetchOptions: RequestInit = {
             ...options,
@@ -44,7 +46,6 @@ export class ApiClient {
         try {
             const response = await fetch(url, fetchOptions)
 
-            // Handle token refresh on 401
             if (response.status === 401 && shouldRetry) {
                 await this.refreshToken()
                 return this.fetch(endpoint, options, false)
@@ -60,7 +61,7 @@ export class ApiClient {
     // Token refresh method
     private async refreshToken(): Promise<void> {
         try {
-            const refreshToken = cookies().get('refreshToken')?.value
+            const refreshToken = getCookie('refreshToken')
 
             const response = await fetch(`${this.baseUrl}/auth/refresh`, {
                 method: 'POST',
@@ -83,10 +84,10 @@ export class ApiClient {
 
     // Convenience methods
     async get(endpoint: string, options: RequestInit = {}) {
-        return this.fetch(endpoint, { ...options, method: 'GET' })
+        return this.fetch(endpoint, {...options, method: 'GET'})
     }
 
-    async post(endpoint: string, body: any, options: RequestInit = {}) {
+    async post(endpoint: string, body: unknown, options: RequestInit = {}) {
         return this.fetch(endpoint, {
             ...options,
             method: 'POST',
@@ -94,7 +95,7 @@ export class ApiClient {
         })
     }
 
-    async put(endpoint: string, body: any, options: RequestInit = {}) {
+    async put(endpoint: string, body: unknown, options: RequestInit = {}) {
         return this.fetch(endpoint, {
             ...options,
             method: 'PUT',
@@ -103,7 +104,7 @@ export class ApiClient {
     }
 
     async delete(endpoint: string, options: RequestInit = {}) {
-        return this.fetch(endpoint, { ...options, method: 'DELETE' })
+        return this.fetch(endpoint, {...options, method: 'DELETE'})
     }
 }
 

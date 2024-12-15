@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import {Folder, Home, User} from 'lucide-react'
 
@@ -17,15 +19,34 @@ import {
 import {LogoutButton} from "./sign-out-button"
 import Link from "next/link"
 import {NoProjects} from "./no-projects"
+
+import pfkTasksClient from "@/client/api-client";
+import {useQuery} from "@tanstack/react-query";
 import {ProjectType} from "@/types/project";
 import {UserType} from "@/types/user";
-import pfkTasksClient from "@/client/api-client";
+import {Spinner} from "@/components/loading-spinner/loading-spinner";
 
-export default async function DashboardSidebar() {
-    const user: UserType | undefined = await pfkTasksClient.get("/user").then((response) => response.json())
-    const projects: ProjectType[] | undefined = await pfkTasksClient.get("/projects").then((response) => response.json())
+export default function DashboardSidebar() {
 
-    if (!user) return null
+    const {data: user} = useQuery({
+        queryKey: ['user'],
+        queryFn: async () => {
+            const response = await pfkTasksClient.get('/user');
+            return await response.json() as UserType;
+        }
+    });
+
+    const {data: projects, isLoading} = useQuery({
+        queryKey: ['projects'],
+        queryFn: async () => {
+            const response = await pfkTasksClient.get('/projects');
+            return await response.json() as ProjectType[];
+        }
+    });
+
+    if(isLoading) {
+        return null
+    }
 
     return (
         <SidebarProvider>
@@ -33,13 +54,13 @@ export default async function DashboardSidebar() {
                 <SidebarHeader>
                     <div className="flex items-center gap-3 px-3 py-4">
                         <Avatar className="border-primary border-2">
-                            <AvatarImage src={user.displayImageUrl || "https://github.com/shadcn.png"}
-                                         alt={user.username}/>
+                            <AvatarImage src={user?.displayImageUrl || "https://github.com/shadcn.png"}
+                                         alt={user?.username}/>
                             <AvatarFallback>{user?.username?.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                            <span className="text-sm font-semibold">{user.username}</span>
-                            <span className="text-xs text-muted-foreground">{user.email}</span>
+                            <span className="text-sm font-semibold">{user?.username}</span>
+                            <span className="text-xs text-muted-foreground">{user?.email}</span>
                         </div>
                     </div>
                     <Separator/>
@@ -71,7 +92,8 @@ export default async function DashboardSidebar() {
                                 {projects.map((project) => (
                                     <SidebarMenuItem key={project.id}>
                                         <SidebarMenuButton asChild>
-                                            <Link href={`/dashboard/project/${project.id}`} className="flex items-center gap-3">
+                                            <Link href={`/dashboard/project/${project.id}`}
+                                                  className="flex items-center gap-3">
                                                 <Folder className="h-4 w-4"/>
                                                 <span>{project.title}</span>
                                             </Link>

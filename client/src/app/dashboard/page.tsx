@@ -1,10 +1,25 @@
+"use client"
+
 import {DataTable} from '@/components/data-table/data-table'
 import EmptyDataTable from "@/components/data-table/empty-data-table";
 import pfkTasksClient from "@/client/api-client";
+import {useQuery} from "@tanstack/react-query";
+import {Spinner} from "@/components/loading-spinner/loading-spinner";
 
-export default async function DashboardPage() {
-    const tasks = await pfkTasksClient.get('/tasks').then((response) => response.json())
-    if (!tasks) return null
+export default function DashboardPage() {
+
+    const { data, isLoading } = useQuery({
+        queryKey: ['tasks'],
+        queryFn: async () => {
+            const response = await pfkTasksClient.get('/tasks');
+            return response.json();
+        }
+    });
+
+
+    if(isLoading) {
+        return <Spinner />
+    }
 
     return (
         <div className="container mx-auto p-8">
@@ -17,10 +32,10 @@ export default async function DashboardPage() {
                         </p>
                     </div>
                 </div>
-                {tasks.length ? (
+                {data && data.length ? (
                     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
                         <div className="p-6">
-                            <DataTable data={tasks}/>
+                            <DataTable data={data}/>
                         </div>
                     </div>
                 ) : <EmptyDataTable/>}

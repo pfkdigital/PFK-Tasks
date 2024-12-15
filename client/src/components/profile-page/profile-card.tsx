@@ -1,16 +1,21 @@
+"use client"
 
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { Label } from "@radix-ui/react-label"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card"
-import { UserType } from "@/types/user"
 import pfkTasksClient from "@/client/api-client";
+import {useQuery} from "@tanstack/react-query";
 
-async function ProfileCard() {
-    const user: UserType | undefined = await pfkTasksClient.get("/user").then((response) => response.json())
+function ProfileCard() {
+    const {data} = useQuery({
+        queryKey: ['user'],
+        queryFn: async () => {
+            const response = await pfkTasksClient.get('/user');
+            return response.json();
+        }
+    })
 
-    if (!user) {
-        return null
-    }
+    const { user } = data;
 
     return (
         <Card className={"bg-accent"}>

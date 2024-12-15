@@ -45,6 +45,7 @@ import {ScrollArea} from "@/components/ui/scroll-area"
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
+import {Task} from "@/types/task";
 
 export enum TaskPriority {
     LOW = "LOW",
@@ -58,17 +59,6 @@ export interface TaskStep {
     description: string;
     status: string;
     taskId: string;
-}
-
-export interface Task {
-    id: string;
-    title: string;
-    description: string;
-    status: string;
-    priority: string;
-    projectId: string;
-    userId: string;
-    taskSteps: TaskStep[];
 }
 
 export const columns: ColumnDef<Task>[] = [
@@ -288,10 +278,6 @@ export function DataTable({data}: { data: Task[] }) {
                 </Table>
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
                 <div className="space-x-2">
                     <Button
                         variant="outline"
@@ -338,14 +324,6 @@ export function DataTable({data}: { data: Task[] }) {
                                         >
                                             {selectedTask.priority}
                                         </Badge>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Project ID</h3>
-                                        <p className="text-sm text-muted-foreground">{selectedTask.projectId}</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-2">User ID</h3>
-                                        <p className="text-sm text-muted-foreground">{selectedTask.userId}</p>
                                     </div>
                                 </div>
                                 <div>

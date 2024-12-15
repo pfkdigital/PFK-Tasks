@@ -1,12 +1,10 @@
 import {AUTH_REFRESH} from "@/constants/api-endpoints";
-import {NextResponse} from "next/server";
-import {ResponseCookies} from "next/dist/compiled/@edge-runtime/cookies";
-import {cookies} from "next/headers";
+import {NextRequest, NextResponse} from "next/server";
 
-export async function GET(request: Request) {
+export async function POST(request: NextRequest) {
+
     try {
-        const cookieStore = cookies()
-        const refreshToken = cookieStore.get("refreshToken")
+        const refreshToken = request.headers.get('Authorization')?.split(' ')[1]
 
         const response = await fetch(AUTH_REFRESH, {
             method: "POST",
@@ -17,24 +15,21 @@ export async function GET(request: Request) {
         })
 
         if (!response.ok) {
-            NextResponse.json({message: "Unable to refresh token"},{status: 402})
+            NextResponse.json({message: `${refreshToken}`}, {status: 402})
         }
 
-        const responseCookies = new ResponseCookies(response.headers);
-        const refreshCookie = responseCookies.get("accessToken")
-        console.log(refreshCookie)
-        if (!refreshCookie) {
-            return NextResponse.json({message: "Unable to refresh token"},{status: 402})
+        const newAccessToken = response.headers.getSetCookie().find((cookie) => cookie.includes('accessToken'))
+
+        if (!newAccessToken) {
+            NextResponse.json({message: 'Failed to refresh token'}, {status: 402})
         }
 
-        cookies().set("accessToken", refreshCookie?.value, {
-            expires: refreshCookie.expires,
-            httpOnly: true,
-            path: "/",
-            secure: true
-        })
-        return NextResponse.json({accessToken: refreshCookie.value});
-    } catch (e) {
-        NextResponse.json({message: "Unable to refresh token"},{status: 402})
+        const res = NextResponse.json({message: 'Token refreshed'});
+
+        res.headers.set('Set-Cookie', `${newAccessToken}`);
+
+        return res
+    } catch (error) {
+        NextResponse.json({message: error}, {status: 402})
     }
 }

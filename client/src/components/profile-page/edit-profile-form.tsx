@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useToast } from '@/hooks/use-toast'
 
 const MAX_FILE_SIZE = 5000000 // 5MB
@@ -60,7 +59,7 @@ const defaultValues: Partial<ProfileFormValues> = {
 
 export function EditProfileForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [, setPreviewImage] = useState<string | null>(null)
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
 

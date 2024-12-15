@@ -23,14 +23,11 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {useToast} from "@/hooks/use-toast";
 import {AUTH_LOGIN} from "@/constants/api-endpoints";
-import {useAuth} from "@/context/user-context";
 
 export function SignInForm() {
 
-    const {setCurrentUser} = useAuth()
     const router = useRouter()
     const {toast} = useToast()
-
     const form = useForm<z.infer<typeof authenticateSchema>>({
         resolver: zodResolver(authenticateSchema),
         defaultValues: {
@@ -52,13 +49,13 @@ export function SignInForm() {
             if (!response.ok) {
                 throw new Error("Failed to login");
             }
-            const result = await response.json()
             toast({
                 title: "Login successful",
                 description: "You have successfully logged in"
             })
-            setCurrentUser(result)
             router.push("/dashboard");
+
+            return response
         } catch (error) {
             console.error(error)
             toast({
