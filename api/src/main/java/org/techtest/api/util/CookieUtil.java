@@ -8,7 +8,7 @@ public class CookieUtil {
 
     public Cookie createAccessTokenCookie(String value) {
         Cookie cookie = new Cookie("accessToken", value);
-        cookie.setMaxAge(60);
+        cookie.setMaxAge(60 * 60 * 3);
         cookie.setPath("/");
         cookie.setSecure(true);
         return cookie;

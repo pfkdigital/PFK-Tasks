@@ -55,15 +55,14 @@ public class SecurityConfig {
                 .formLogin(
                         formLogin ->
                                 formLogin
-                                        .loginPage(allowedOrigins + "/sign-in")
                                         .successHandler((request, response, authentication) -> response.setStatus(HttpStatus.NO_CONTENT.value()))
                                         .failureHandler(new SimpleUrlAuthenticationFailureHandler()))
                 .oauth2Login(
                         oauth2 ->
                                 oauth2
-                                        .loginPage(allowedOrigins + "/sign-in")
                                         .successHandler(oauth2LoginSuccessHandler)
-                                        .failureHandler(oauth2LoginFailureHandler))
+                                        .failureHandler(oauth2LoginFailureHandler)
+                )
                 .authenticationProvider(authenticationProvider())
                 .logout(logout ->
                         logout

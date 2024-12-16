@@ -72,8 +72,10 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
     TokenResponse tokens = generateJwtTokens(oauthUser);
 
     Cookie accessTokenCookie = cookieUtil.createAccessTokenCookie(tokens.getAccessToken());
+    Cookie refreshTokenCookie = cookieUtil.createRefreshTokenCookie(tokens.getRefreshToken());
 
     response.addCookie(accessTokenCookie);
+    response.addCookie(refreshTokenCookie);
     response.sendRedirect(allowedOrigins + "/dashboard");
   }
 
