@@ -127,7 +127,7 @@ export default function CreateProjectPage() {
     }
 
     return (
-        <div className="container max-w-3xl mx-auto py-10">
+        <>
             <h1 className="text-3xl font-bold mb-6">Create New Project</h1>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -299,7 +299,7 @@ export default function CreateProjectPage() {
                     </Button>
                 </form>
             </Form>
-        </div>
+        </>
     )
 }
 

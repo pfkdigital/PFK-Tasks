@@ -35,9 +35,8 @@ const Page = ({params}: PageProps) => {
         }
 
         return (
-            <div className="container mx-auto py-10">
+            <>
                 <h1 className="text-3xl font-bold mb-6">{data?.title}</h1>
-
                 <div className="grid gap-6 mb-6 md:grid-cols-2">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -98,7 +97,7 @@ const Page = ({params}: PageProps) => {
                         {data?.tasks && <KanbanBoard tasks={data?.tasks}/>}
                     </CardContent>
                 </Card>
-            </div>
+            </>
         );
     }
 ;

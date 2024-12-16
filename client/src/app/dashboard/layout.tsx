@@ -10,7 +10,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     <DashboardSidebar/>
                 </SidebarProvider>
             </div>
-            <section className="w-full px-4">
+            <section className="container mx-auto p-8">
                 {children}
             </section>
         </main>

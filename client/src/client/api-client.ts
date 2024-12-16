@@ -1,5 +1,6 @@
 // ApiClient.ts
-import {getCookie, CookieValueTypes } from 'cookies-next';
+import {getCookie, CookieValueTypes, deleteCookie, setCookie} from 'cookies-next';
+import {ResponseCookies} from "next/dist/compiled/@edge-runtime/cookies";
 
 export class ApiClient {
     private static instance: ApiClient;
@@ -59,7 +60,7 @@ export class ApiClient {
     }
 
     // Token refresh method
-    private async refreshToken(): Promise<void> {
+    private async refreshToken(): Promise<Response> {
         try {
             const refreshToken = getCookie('refreshToken')
 
@@ -76,7 +77,7 @@ export class ApiClient {
                 throw new Error('Token refresh failed')
             }
 
-            return
+            return response
         } catch (error) {
             throw error
         }
